@@ -36,10 +36,10 @@ class SnippetPanel(
             val idx = s.body.indexOf(marker)
             if (idx >= 0) {
                 val clean = s.body.replace(marker, "")
-                host.insertText(clean)
                 val back = clean.length - idx
-                host.notifyUser("تم الإدراج")
                 moveCursorBack(back)
+                host.insertText(clean)
+                host.notifyUser("تم الإدراج")
             } else {
                 host.insertText(s.body)
             }

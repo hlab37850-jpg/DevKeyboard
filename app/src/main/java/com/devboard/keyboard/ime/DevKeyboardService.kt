@@ -17,7 +17,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.ExtractedTextRequest
-import android.widget.TextView
 import android.widget.Toast
 import com.devboard.keyboard.core.KeyDef
 import com.devboard.keyboard.core.KeyKind
@@ -55,8 +54,6 @@ class DevKeyboardService : InputMethodService(), PanelHost {
     private val clipListener = ClipboardManager.OnPrimaryClipChangedListener { pullClipboard() }
     private var clipManager: ClipboardManager? = null
 
-    // ---------------------------------------------------------------- lifecycle
-
     override fun onCreate() {
         super.onCreate()
         Prefs.init(this)
@@ -82,14 +79,17 @@ class DevKeyboardService : InputMethodService(), PanelHost {
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         secure = isSecure(info)
-        ctrl = false; alt = false
+        ctrl = false
+        alt = false
+
         if (!restarting) {
             shift = if (Prefs.autoCap && !secure && shouldCap(info)) 1 else 0
             mode = "letters"
         }
+
         if (secure) closePanel()
         pullClipboard()
-        updateStatus(info)
+        updateStatus()
         paint()
         rebuild()
     }
@@ -110,10 +110,9 @@ class DevKeyboardService : InputMethodService(), PanelHost {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        paint(); rebuild()
+        paint()
+        rebuild()
     }
-
-    // ---------------------------------------------------------------- rendering
 
     private fun paint() {
         val v = b ?: return
@@ -139,17 +138,19 @@ class DevKeyboardService : InputMethodService(), PanelHost {
         renderer.refresh(shift, ctrl, alt)
     }
 
-    private fun updateStatus(info: EditorInfo?) {
+    private fun updateStatus() {
         val v = b ?: return
         if (secure) {
             v.tvStatus.visibility = View.VISIBLE
             v.tvStatus.text = getString(com.devboard.keyboard.R.string.secure_mode)
             v.btnTranslate.alpha = 0.35f
             v.btnClip.alpha = 0.35f
+            v.btnSnip.alpha = 0.35f
         } else {
             v.tvStatus.visibility = View.GONE
             v.btnTranslate.alpha = 1f
             v.btnClip.alpha = 1f
+            v.btnSnip.alpha = 1f
         }
     }
 
@@ -176,31 +177,39 @@ class DevKeyboardService : InputMethodService(), PanelHost {
             caps and InputType.TYPE_TEXT_FLAG_CAP_WORDS != 0
     }
 
-    // ---------------------------------------------------------------- key handling
-
     private fun onKey(k: KeyDef) {
         feedback()
+
         if (panel == Panel.TRANSLATE && k.kind == KeyKind.CHAR) {
             val t = if (shift > 0) (k.shiftCode ?: k.code.uppercase()) else k.code
             translatePanel?.typeText(t)
-            if (shift == 1) { shift = 0; renderer.refresh(shift, ctrl, alt) }
+            if (shift == 1) {
+                shift = 0
+                renderer.refresh(shift, ctrl, alt)
+            }
             return
         }
+
         if (panel == Panel.TRANSLATE && k.code == "BACKSPACE") {
-            translatePanel?.backspace(); return
+            translatePanel?.backspace()
+            return
         }
+
         if (panel == Panel.TRANSLATE && (k.code == "SPACE" || k.code == "ENTER")) {
-            translatePanel?.typeText(if (k.code == "SPACE") " " else "\n"); return
+            translatePanel?.typeText(if (k.code == "SPACE") " " else "\n")
+            return
         }
 
         if (k.kind == KeyKind.CHAR) {
             val t = if (shift > 0) (k.shiftCode ?: k.code.uppercase()) else k.code
             if (ctrl || alt) sendModified(t) else commit(t)
             if (shift == 1) shift = 0
-            ctrl = false; alt = false
+            ctrl = false
+            alt = false
             renderer.refresh(shift, ctrl, alt)
             return
         }
+
         action(k.code)
     }
 
@@ -209,18 +218,35 @@ class DevKeyboardService : InputMethodService(), PanelHost {
             feedback()
             if (panel == Panel.TRANSLATE) translatePanel?.typeText(k.alt!!)
             else commit(k.alt!!)
-            if (shift == 1) { shift = 0; renderer.refresh(shift, ctrl, alt) }
+            if (shift == 1) {
+                shift = 0
+                renderer.refresh(shift, ctrl, alt)
+            }
             return true
         }
+
         if (k.code == "SHIFT") {
-            shift = 2; renderer.refresh(shift, ctrl, alt); return true
+            shift = 2
+            renderer.refresh(shift, ctrl, alt)
+            return true
         }
+
+        if (k.code == "ENTER") {
+            feedback()
+            commit("\n")
+            return true
+        }
+
         if (k.code == "BACKSPACE" && panel != Panel.TRANSLATE) {
-            deleteWord(); return true
+            deleteWord()
+            return true
         }
+
         if (k.code == "SPACE") {
-            switchInputMethodByPicker(); return true
+            switchInputMethodByPicker()
+            return true
         }
+
         return false
     }
 
@@ -231,26 +257,37 @@ class DevKeyboardService : InputMethodService(), PanelHost {
                 shift = if (now - lastShiftTap < 320) 2 else if (shift == 0) 1 else 0
                 lastShiftTap = now
             }
+
             "CTRL" -> ctrl = !ctrl
             "ALT" -> alt = !alt
             "BACKSPACE" -> backspace()
             "ENTER" -> enter()
+
             "SPACE" -> {
                 val now = SystemClock.uptimeMillis()
                 if (Prefs.doubleSpacePeriod && now - lastSpaceTap < 300 && Prefs.lang != "ar") {
                     val ic = currentInputConnection
                     val before = ic?.getTextBeforeCursor(2, 0)?.toString() ?: ""
-                    if (before == " ") { ic?.deleteSurroundingText(1, 0); commit(". ") }
-                    else commit(" ")
-                } else commit(" ")
+                    if (before == " ") {
+                        ic?.deleteSurroundingText(1, 0)
+                        commit(". ")
+                    } else {
+                        commit(" ")
+                    }
+                } else {
+                    commit(" ")
+                }
                 lastSpaceTap = now
             }
+
             "TAB" -> sendKey(KeyEvent.KEYCODE_TAB)
             "ESC" -> sendKey(KeyEvent.KEYCODE_ESCAPE)
+
             "ARROW_LEFT" -> sendKey(KeyEvent.KEYCODE_DPAD_LEFT, if (shift > 0) KeyEvent.META_SHIFT_ON else 0)
             "ARROW_RIGHT" -> sendKey(KeyEvent.KEYCODE_DPAD_RIGHT, if (shift > 0) KeyEvent.META_SHIFT_ON else 0)
             "ARROW_UP" -> sendKey(KeyEvent.KEYCODE_DPAD_UP)
             "ARROW_DOWN" -> sendKey(KeyEvent.KEYCODE_DPAD_DOWN)
+
             "CTRL_C" -> sendKey(KeyEvent.KEYCODE_C, KeyEvent.META_CTRL_ON)
             "CTRL_D" -> sendKey(KeyEvent.KEYCODE_D, KeyEvent.META_CTRL_ON)
             "CTRL_Z" -> sendKey(KeyEvent.KEYCODE_Z, KeyEvent.META_CTRL_ON)
@@ -259,11 +296,25 @@ class DevKeyboardService : InputMethodService(), PanelHost {
             "CTRL_E" -> sendKey(KeyEvent.KEYCODE_E, KeyEvent.META_CTRL_ON)
             "CTRL_U" -> sendKey(KeyEvent.KEYCODE_U, KeyEvent.META_CTRL_ON)
             "CTRL_K" -> sendKey(KeyEvent.KEYCODE_K, KeyEvent.META_CTRL_ON)
+
+            "UNDO" -> sendKey(KeyEvent.KEYCODE_Z, KeyEvent.META_CTRL_ON)
+            "REDO" -> sendKey(KeyEvent.KEYCODE_Y, KeyEvent.META_CTRL_ON)
+            "COPY" -> performCopy()
+            "CUT" -> performCut()
+            "PASTE" -> performPaste()
+            "SELECT_ALL" -> performSelectAll()
+
+            "MOVE_HOME" -> sendKey(KeyEvent.KEYCODE_MOVE_HOME)
+            "MOVE_END" -> sendKey(KeyEvent.KEYCODE_MOVE_END)
+            "PAGE_UP" -> sendKey(KeyEvent.KEYCODE_PAGE_UP)
+            "PAGE_DOWN" -> sendKey(KeyEvent.KEYCODE_PAGE_DOWN)
+
             "LANG" -> toggleLang()
             "SYM_PAGE1" -> mode = "sym1"
             "SYM_PAGE2" -> mode = "sym2"
             "ABC" -> mode = "letters"
         }
+
         if (::renderer.isInitialized) renderer.refresh(shift, ctrl, alt)
         if (code == "SYM_PAGE1" || code == "SYM_PAGE2" || code == "ABC" || code == "LANG") rebuild()
     }
@@ -278,11 +329,9 @@ class DevKeyboardService : InputMethodService(), PanelHost {
     private fun switchInputMethodByPicker() {
         runCatching {
             val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            imm.showInputMethodPicker()
+            imm?.showInputMethodPicker()
         }
     }
-
-    // ---------------------------------------------------------------- input connection
 
     private fun commit(t: String) {
         currentInputConnection?.commitText(t, 1)
@@ -303,6 +352,7 @@ class DevKeyboardService : InputMethodService(), PanelHost {
                 in '0'..'9' -> KeyEvent.KEYCODE_0 + (c - '0')
                 else -> -1
             }
+
             if (base >= 0) {
                 var meta = 0
                 if (ctrl) meta = meta or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
@@ -310,10 +360,17 @@ class DevKeyboardService : InputMethodService(), PanelHost {
                 sendKey(base, meta)
                 return
             }
+
             if (ctrl) {
                 val code = c.code
-                if (code in 64..95) { commit((code - 64).toChar().toString()); return }
-                if (code in 97..122) { commit((code - 96).toChar().toString()); return }
+                if (code in 64..95) {
+                    commit((code - 64).toChar().toString())
+                    return
+                }
+                if (code in 97..122) {
+                    commit((code - 96).toChar().toString())
+                    return
+                }
             }
         }
         commit(text)
@@ -322,14 +379,21 @@ class DevKeyboardService : InputMethodService(), PanelHost {
     private fun backspace() {
         val ic = currentInputConnection ?: return
         val sel = ic.getSelectedText(0)
-        if (!sel.isNullOrEmpty()) { ic.commitText("", 1); return }
+        if (!sel.isNullOrEmpty()) {
+            ic.commitText("", 1)
+            return
+        }
         sendKey(KeyEvent.KEYCODE_DEL)
     }
 
     private fun deleteWord() {
         val ic = currentInputConnection ?: return
         val before = ic.getTextBeforeCursor(40, 0)?.toString()
-        if (before.isNullOrEmpty()) { sendKey(KeyEvent.KEYCODE_DEL); return }
+        if (before.isNullOrEmpty()) {
+            sendKey(KeyEvent.KEYCODE_DEL)
+            return
+        }
+
         var n = before.length
         while (n > 0 && before[n - 1] == ' ') n--
         while (n > 0 && before[n - 1] != ' ') n--
@@ -344,19 +408,100 @@ class DevKeyboardService : InputMethodService(), PanelHost {
         if (multiline) commit("\n") else sendKey(KeyEvent.KEYCODE_ENTER)
     }
 
-    // ---------------------------------------------------------------- panels
+    private fun performCopy() {
+        if (secure) {
+            notifyUser(getString(com.devboard.keyboard.R.string.secure_mode))
+            return
+        }
+        val ic = currentInputConnection ?: return
+        val ok = ic.performContextMenuAction(android.R.id.copy)
+        if (!ok) {
+            val sel = ic.getSelectedText(0)?.toString()
+            if (sel.isNullOrEmpty()) {
+                notifyUser("لا يوجد نص محدد")
+            } else {
+                copyText(sel)
+                notifyUser("تم نسخ ${sel.length} حرف")
+            }
+        } else {
+            notifyUser("تم النسخ")
+        }
+    }
+
+    private fun performCut() {
+        if (secure) {
+            notifyUser(getString(com.devboard.keyboard.R.string.secure_mode))
+            return
+        }
+        val ic = currentInputConnection ?: return
+        val ok = ic.performContextMenuAction(android.R.id.cut)
+        if (!ok) {
+            val sel = ic.getSelectedText(0)?.toString()
+            if (sel.isNullOrEmpty()) {
+                notifyUser("لا يوجد نص محدد")
+            } else {
+                copyText(sel)
+                ic.commitText("", 1)
+                notifyUser("تم القص")
+            }
+        } else {
+            notifyUser("تم القص")
+        }
+    }
+
+    private fun performPaste() {
+        if (secure) {
+            notifyUser(getString(com.devboard.keyboard.R.string.secure_mode))
+            return
+        }
+        val ic = currentInputConnection ?: return
+        val ok = ic.performContextMenuAction(android.R.id.paste)
+        if (!ok) {
+            val t = readClipboard()
+            if (t.isEmpty()) {
+                notifyUser("الحافظة فارغة")
+            } else {
+                commit(t)
+            }
+        }
+    }
+
+    private fun performSelectAll() {
+        val ic = currentInputConnection ?: return
+        val ok = ic.performContextMenuAction(android.R.id.selectAll)
+        if (!ok) {
+            val before = ic.getTextBeforeCursor(100000, 0)?.length ?: 0
+            val after = ic.getTextAfterCursor(100000, 0)?.length ?: 0
+            val total = before + after
+            if (total == 0) {
+                notifyUser("لا يوجد نص")
+            } else {
+                ic.setSelection(0, total)
+                notifyUser("تم تحديد الكل")
+            }
+        } else {
+            notifyUser("تم تحديد الكل")
+        }
+    }
 
     private fun togglePanel(p: Panel) {
-        if (secure && (p == Panel.TRANSLATE || p == Panel.CLIP)) {
-            notifyUser(getString(com.devboard.keyboard.R.string.secure_mode)); return
+        if (secure) {
+            notifyUser(getString(com.devboard.keyboard.R.string.secure_mode))
+            return
         }
-        if (panel == p) { closePanel(); return }
+
+        if (panel == p) {
+            closePanel()
+            return
+        }
+
         val v = b ?: return
         closePanel()
         panel = p
         v.panelContainer.removeAllViews()
         v.panelContainer.visibility = View.VISIBLE
         v.keysContainer.visibility = View.GONE
+
         when (p) {
             Panel.TRANSLATE -> {
                 val tp = TranslatePanel(this, v.panelContainer, this)
@@ -365,17 +510,20 @@ class DevKeyboardService : InputMethodService(), PanelHost {
                 val sel = runCatching { currentInputConnection?.getSelectedText(0)?.toString() }.getOrNull()
                 if (!sel.isNullOrEmpty()) tp.loadText(sel)
             }
+
             Panel.CLIP -> {
                 pullClipboard()
                 val cp = ClipPanel(this, v.panelContainer, this) { pullClipboard() }
                 clipPanel = cp
                 v.panelContainer.addView(cp.view)
             }
+
             Panel.SNIPPET -> {
                 val sp = SnippetPanel(this, v.panelContainer, this)
                 snippetPanel = sp
                 v.panelContainer.addView(sp.view)
             }
+
             else -> {}
         }
     }
@@ -384,27 +532,24 @@ class DevKeyboardService : InputMethodService(), PanelHost {
         val v = b
         translatePanel?.cancel()
         panel = Panel.NONE
-        translatePanel = null; clipPanel = null; snippetPanel = null
+        translatePanel = null
+        clipPanel = null
+        snippetPanel = null
         v?.panelContainer?.removeAllViews()
         v?.panelContainer?.visibility = View.GONE
         v?.keysContainer?.visibility = View.VISIBLE
         if (v != null && ::renderer.isInitialized) rebuild()
     }
 
-    // ---------------------------------------------------------------- PanelHost
-
     override fun insertText(t: String) {
         commit(t)
         val back = snippetPanel?.consumeCursorBack() ?: 0
         if (back > 0) {
             val ic = currentInputConnection
-            val cur = ic?.getTextBeforeCursor(0, 0)
-            if (cur != null) {
-                val et = ic.getExtractedText(ExtractedTextRequest(), 0)
-                if (et != null) {
-                    val pos = (et.startOffset + et.selectionEnd - back).coerceAtLeast(0)
-                    ic.setSelection(pos, pos)
-                }
+            val et = ic?.getExtractedText(ExtractedTextRequest(), 0)
+            if (et != null) {
+                val pos = (et.startOffset + et.selectionEnd.coerceAtLeast(0) - back).coerceAtLeast(0)
+                ic.setSelection(pos, pos)
             }
         }
     }
@@ -412,7 +557,10 @@ class DevKeyboardService : InputMethodService(), PanelHost {
     override fun replaceLast(sourceLen: Int, t: String) {
         val ic = currentInputConnection ?: return
         val sel = ic.getSelectedText(0)
-        if (!sel.isNullOrEmpty()) { ic.commitText(t, 1); return }
+        if (!sel.isNullOrEmpty()) {
+            ic.commitText(t, 1)
+            return
+        }
         val before = ic.getTextBeforeCursor(sourceLen, 0)?.toString() ?: ""
         ic.deleteSurroundingText(before.length, 0)
         ic.commitText(t, 1)
@@ -428,13 +576,16 @@ class DevKeyboardService : InputMethodService(), PanelHost {
         val ic = currentInputConnection ?: return ""
         val sel = runCatching { ic.getSelectedText(0)?.toString() }.getOrNull()
         if (!sel.isNullOrEmpty()) return sel
+
         val et = runCatching {
             ic.getExtractedText(ExtractedTextRequest().apply { hintMaxChars = 4000; flags = 0 }, 0)
         }.getOrNull()
+
         if (et != null && et.text != null) {
             val full = et.text.toString()
             return if (full.length <= 2000) full else full.take(2000)
         }
+
         return ic.getTextBeforeCursor(1000, 0)?.toString().orEmpty()
     }
 
@@ -470,8 +621,6 @@ class DevKeyboardService : InputMethodService(), PanelHost {
         }
     }
 
-    // ---------------------------------------------------------------- feedback
-
     private fun feedback() {
         if (Prefs.vibrate) {
             runCatching {
@@ -481,14 +630,17 @@ class DevKeyboardService : InputMethodService(), PanelHost {
                     @Suppress("DEPRECATION")
                     getSystemService(VIBRATOR_SERVICE) as? Vibrator
                 }
+
                 val ms = Prefs.vibrateMs.toLong().coerceIn(1L, 60L)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     vib?.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    @Suppress("DEPRECATION") vib?.vibrate(ms)
+                    @Suppress("DEPRECATION")
+                    vib?.vibrate(ms)
                 }
             }
         }
+
         if (Prefs.sound) {
             runCatching {
                 (getSystemService(AUDIO_SERVICE) as? AudioManager)

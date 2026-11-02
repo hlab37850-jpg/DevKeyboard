@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/kbRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="2dp"
+    android:paddingBottom="3dp">
+
+    <LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="2dp">
+
+        <TextView android:id="@+id/btnLang" style="@style/ToolbarChip" android:text="EN" />
+        <TextView android:id="@+id/btnTranslate" style="@style/ToolbarChip" android:text="@string/chip_translate" />
+        <TextView android:id="@+id/btnClip" style="@style/ToolbarChip" android:text="@string/chip_clip" />
+        <TextView android:id="@+id/btnSnip" style="@style/ToolbarChip" android:text="@string/chip_snip" />
+        <TextView android:id="@+id/btnSettings" style="@style/ToolbarChip" android:text="@string/chip_settings" />
+        <TextView android:id="@+id/btnHide" style="@style/ToolbarChip" android:text="@string/chip_hide" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="2dp"
+        android:textSize="10sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/panelContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/keysContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp" />
+
+</LinearLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DevKeyboard</string>
+    <string name="ime_label">DevKeyboard — لوحة المطوّر</string>
+    <string name="subtype_en">English (Dev)</string>
+    <string name="subtype_ar">العربية (Dev)</string>
+
+    <string name="chip_translate">ترجمة</string>
+    <string name="chip_clip">حافظة</string>
+    <string name="chip_snip">أوامر</string>
+    <string name="chip_settings">ضبط</string>
+    <string name="chip_hide">إخفاء</string>
+
+    <string name="tr_source_hint">النص المصدر — اكتب بمفاتيح اللوحة</string>
+    <string name="tr_result_hint">النتيجة تظهر هنا</string>
+    <string name="tr_grab">جلب النص</string>
+    <string name="tr_paste">لصق</string>
+    <string name="tr_clear">مسح</string>
+    <string name="tr_go">ترجم</string>
+    <string name="tr_insert">إدراج</string>
+    <string name="tr_replace">استبدال</string>
+    <string name="tr_copy">نسخ</string>
+    <string name="tr_working">جارٍ الترجمة…</string>
+
+    <string name="clip_refresh">تحديث</string>
+    <string name="clip_clear">مسح</string>
+    <string name="clip_empty">لا توجد عناصر محفوظة</string>
+    <string name="clip_hint">نقرة = إدراج · ضغطة مطوّلة = تثبيت/حذف</string>
+
+    <string name="snip_manage">إدارة</string>
+    <string name="snip_empty">لا توجد أوامر محفوظة</string>
+    <string name="snip_hint">%% يحدد موضع المؤشر بعد الإدراج</string>
+    <string name="snippets_title">إدارة الأوامر</string>
+
+    <string name="secure_mode">وضع آمن: تم تعطيل الحافظة والترجمة في هذا الحقل</string>
+    <string name="settings_title">إعدادات DevKeyboard</string>
+
+    <string name="setup_title">تفعيل لوحة المطوّر</string>
+    <string name="setup_desc">لوحة مفاتيح مخصّصة لكتابة الأوامر والأكواد في Termux، مع ترجمة فعلية عبر الإنترنت وصف أدوات الطرفية.</string>
+    <string name="setup_enable">1) تفعيل اللوحة في النظام</string>
+    <string name="setup_pick">2) اختيار اللوحة الآن</string>
+    <string name="setup_settings">3) الإعدادات</string>
+    <string name="setup_snippets">4) إدارة الأوامر</string>
+    <string name="setup_privacy">الخصوصية: لا يتم تسجيل أي نص تكتبه. الحافظة تُحفظ محلياً فقط على جهازك، وتُعطَّل تلقائياً في حقول كلمات المرور. الترجمة ترسل النص الذي تطلب ترجمته فقط إلى مزوّد الترجمة الذي تختاره.</string>
+
+    <string name="state_enabled">مفعّلة في النظام</string>
+    <string name="state_disabled">غير مفعّلة</string>
+    <string name="state_selected">محددة كلوحة حالية</string>
+    <string name="state_not_selected">ليست اللوحة الحالية</string>
+
+    <string name="sec_appearance">المظهر</string>
+    <string name="sec_keys">المفاتيح</string>
+    <string name="sec_translate">الترجمة</string>
+    <string name="sec_data">البيانات</string>
+    <string name="save">حفظ الإعدادات</string>
+    <string name="saved">تم الحفظ</string>
+    <string name="add">إضافة</string>
+    <string name="edit">تعديل</string>
+    <string name="delete">حذف</string>
+    <string name="cancel">إلغاء</string>
+    <string name="pin">تثبيت / إلغاء التثبيت</string>
+</resources>

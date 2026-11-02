@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView style="@style/SectionTitle" android:text="@string/sec_appearance" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="الثيم" />
+        <Spinner android:id="@+id/spTheme" android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <TextView style="@style/SectionTitle" android:text="@string/sec_keys" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swVibrate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="اهتزاز عند الضغط" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="قوة الاهتزاز (ms)" />
+        <SeekBar android:id="@+id/sbVibrate" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="60" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swSound" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="صوت عند الضغط" />
+        <TextView android:id="@+id/tvKeyHeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="ارتفاع المفتاح" />
+        <SeekBar android:id="@+id/sbKeyHeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="40" />
+        <TextView android:id="@+id/tvTextSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="حجم خط المفاتيح" />
+        <SeekBar android:id="@+id/sbTextSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="12" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swNumberRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="صف الأرقام العلوي" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swDevRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="صف أدوات Termux (Esc/Tab/Ctrl/Alt/أسهم)" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swAutoCap" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تكبير أول حرف تلقائياً" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swDoubleSpace" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="مسافة مزدوجة تكتب نقطة" />
+
+        <TextView style="@style/SectionTitle" android:text="@string/sec_translate" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="مزوّد الترجمة" />
+        <Spinner android:id="@+id/spProvider" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="بريد MyMemory (اختياري، يرفع الحصة)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="رابط خادم LibreTranslate">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLibreUrl" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="مفتاح LibreTranslate API (اختياري)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLibreKey" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swCache" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="حفظ الترجمات لتقليل استهلاك الإنترنت" />
+
+        <TextView style="@style/SectionTitle" android:text="@string/sec_data" />
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swClipboard" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تفعيل سجل الحافظة" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearCache" style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="مسح ذاكرة الترجمة" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearClip" style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="مسح سجل الحافظة بالكامل" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnResetSnips" style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="استعادة الأوامر الافتراضية" />
+
+        <TextView android:id="@+id/tvInfo" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="12dp" android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" android:layout_marginBottom="24dp" android:text="@string/save" />
+    </LinearLayout>
+</ScrollView>

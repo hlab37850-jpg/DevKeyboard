@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="theme_names">
+        <item>حسب النظام</item>
+        <item>فاتح</item>
+        <item>داكن</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+    <string-array name="provider_names">
+        <item>MyMemory (بدون مفتاح)</item>
+        <item>LibreTranslate (خادم خاص)</item>
+    </string-array>
+    <string-array name="provider_values">
+        <item>mymemory</item>
+        <item>libre</item>
+    </string-array>
+</resources>

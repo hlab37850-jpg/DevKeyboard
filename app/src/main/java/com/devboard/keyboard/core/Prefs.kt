@@ -36,7 +36,7 @@ object Prefs {
         set(v) = put("vibrate_ms", v)
 
     var sound: Boolean
-        get() = sp.getBoolean("sound", false)
+        get() = sp.getBoolean("sound", true)
         set(v) = put("sound", v)
 
     var keyHeight: Int
